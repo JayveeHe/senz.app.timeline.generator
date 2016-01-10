@@ -14,7 +14,7 @@ def process_timeline(user_id, time_range):
     :param time_range: 10 digits
     :return:
     """
-    combined_timelines = combine_timeline('564bd84b60b2ed362064985f', (time_range[0], time_range[1]))
+    combined_timelines = combine_timeline(user_id, (time_range[0], time_range[1]))
     insert_count = save_timeline2mongo(combined_timelines)
     if insert_count is not None:
         print 'user:%s done, process timeline count = %s' % (user_id, insert_count)
@@ -54,5 +54,5 @@ def process_all_timelines(time_range):
 
 if __name__ == '__main__':
     current_time = time.time()
-    process_all_timelines(time_range=((current_time - 12 * 3600.0), current_time))
+    process_all_timelines(time_range=((current_time - 1 * 3600.0), current_time))
     # process_timeline('560388c100b09b53b59504d2',time_range=((current_time - 6 * 3600.0), current_time))
