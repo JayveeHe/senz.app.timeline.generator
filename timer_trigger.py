@@ -39,14 +39,14 @@ def process_all_timelines(time_range):
     for user_id in user_ids:
         # query the latest event time
         tmp = db_combined_timeline.find({'user_id': user_id}).sort('timestamp', -1).limit(1)
-        tmp_item = next(tmp,None)
+        tmp_item = next(tmp, None)
 
         # for tmp_item in tmp:
 
         if tmp_item:
             tmp_time_range = (tmp_item['timestamp'] / 1000, time_range[1])
         else:
-            tmp_time_range = (time_range[0],time_range[1])
+            tmp_time_range = (time_range[0], time_range[1])
 
         gevent_task.append(gevent.spawn(process_timeline, user_id, tmp_time_range))
         if count % window == 0:
