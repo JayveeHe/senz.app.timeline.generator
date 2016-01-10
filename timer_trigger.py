@@ -1,5 +1,6 @@
 import datetime
 import time
+import arrow
 import gevent
 from dao_utils import save_timeline2mongo, get_all_users, db_combined_timeline
 from data_collector import combine_timeline
@@ -14,12 +15,15 @@ def process_timeline(user_id, time_range):
     :param time_range: 10 digits
     :return:
     """
+    print '[%s]start process user:%s time_range: from %s to %s' % (
+        datetime.datetime.now(), user_id, datetime.datetime.fromtimestamp(time_range[0]),
+        datetime.datetime.fromtimestamp(time_range[1]))
     combined_timelines = combine_timeline(user_id, (time_range[0], time_range[1]))
     insert_count = save_timeline2mongo(combined_timelines)
     if insert_count is not None:
-        print 'user:%s done, process timeline count = %s' % (user_id, insert_count)
+        print '[%s]user:%s done, process timeline count = %s' % (datetime.datetime.now(), user_id, insert_count)
     else:
-        print 'user:%s error' % user_id
+        print '[%s]user:%s error' % (datetime.datetime.now(), user_id)
 
 
 def process_all_timelines(time_range):
