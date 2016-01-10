@@ -1,0 +1,12 @@
+pymongo
+Flask>=0.10.1
+leancloud-sdk
+pyopenssl
+ndg-httpsclient
+pyasn1
+nose
+logentries
+blinker
+bugsnag
+gevent
+requests
