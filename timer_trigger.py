@@ -39,6 +39,7 @@ def process_all_timelines(time_range):
         for tmp_item in tmp:
             if tmp_item:
                 time_range = (tmp_item['timestamp'] / 1000, time_range[1])
+
         gevent_task.append(gevent.spawn(process_timeline, user_id, time_range))
         if count % window == 0:
             # print 'start gevent'
@@ -54,5 +55,5 @@ def process_all_timelines(time_range):
 
 if __name__ == '__main__':
     current_time = time.time()
-    process_all_timelines(time_range=((current_time - 1 * 3600.0), current_time))
+    process_all_timelines(time_range=((current_time - 24 * 3600.0), current_time))
     # process_timeline('560388c100b09b53b59504d2',time_range=((current_time - 6 * 3600.0), current_time))
