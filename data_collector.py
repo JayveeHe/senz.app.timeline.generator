@@ -1,9 +1,10 @@
+import datetime
 from dao_utils import get_user_hos, get_user_events, get_mot_item, get_loc_item, save_timeline2mongo
 import time_utils
 
 __author__ = 'jayvee'
 
-start_timestamp = time_utils.trans_strtime2timestamp('2016-01-10 22:00:00')
+start_timestamp = time_utils.trans_strtime2timestamp('2016-01-10 00:00:00')
 end_timestamp = time_utils.trans_strtime2timestamp('2016-01-10 23:59:59')
 
 
@@ -55,6 +56,9 @@ def combine_timeline(user_id, time_range):
                                               'endTime': split_hos_list[len(split_hos_list) - 1]['timestamp'],
                                               'status': split_hos_list[0]['status'],
                                               'user_location_id': split_hos_list[0]['user_location_id'],
+                                              'start_location_id': split_hos_list[0]['user_location_id'],
+                                              'end_location_id': split_hos_list[len(split_hos_list) - 1][
+                                                  'user_location_id'],
                                               '_id': str(split_hos_list[0]['_id']),
                                               'hos_evidences': [str(x['_id']) for x in split_hos_list]}})
                 split_hos_list = [hos]
@@ -69,21 +73,38 @@ def combine_timeline(user_id, time_range):
                                           'endTime': split_hos_list[len(split_hos_list) - 1]['timestamp'],
                                           'status': split_hos_list[0]['status'],
                                           'user_location_id': split_hos_list[0]['user_location_id'],
+                                          'start_location_id': split_hos_list[0]['user_location_id'],
+                                          'end_location_id': split_hos_list[len(split_hos_list) - 1][
+                                              'user_location_id'],
                                           '_id': str(split_hos_list[0]['_id']),
                                           'hos_evidences': [str(x['_id']) for x in split_hos_list]}})
             # combine_list.append({'type': 'hos', 'timestamp': hos['timestamp'], 'data': hos})
     if len(event_list) > 0:
         for event in event_list:
+            event['start_location_id'] = event['evidence_list'][0]['location_id']
+            event['end_location_id'] = event['evidence_list'][len(event['evidence_list']) - 1]['location_id']
             combine_list.append({'type': 'event', 'timestamp': event['startTime'], 'data': event})
     sorted_list = sorted(combine_list, cmp=lambda x, y: cmp(x['timestamp'], y['timestamp']))
     timeline = []
     for item in sorted_list:
+        start_location_item = get_loc_item(item['data']['start_location_id'])
+        start_poi = get_nearest_poi(start_location_item['pois']['pois'])
+        end_location_item = get_loc_item(item['data']['end_location_id'])
+        end_poi = get_nearest_poi(end_location_item['pois']['pois'])
         if item['type'] == 'hos':
             poi = get_loc_item(item['data']['user_location_id'])
             nearest_poi = get_nearest_poi(poi['pois']['pois'])
             timeline.append({'user_id': user_id, 'type': 'hos',
                              'label': item['data']['status'],
                              'timestamp': item['data']['startTime'],
+                             'start_ts': item['data']['startTime'],
+                             'start_datetime': datetime.datetime.fromtimestamp(item['data']['startTime'] / 1000),
+                             'end_ts': item['data']['endTime'],
+                             'end_datetime': datetime.datetime.fromtimestamp(item['data']['endTime'] / 1000),
+                             'start_location': {'title': start_poi[0], 'dist': start_poi[1],
+                                                'geo_point': start_location_item['location']},
+                             'end_location': {'title': end_poi[0], 'dist': end_poi[1],
+                                              'geo_point': end_location_item['location']},
                              'evidence_list': {
                                  'hos_ids': item['data']['hos_evidences'],
                                  'location_ids': [],
@@ -115,7 +136,13 @@ def combine_timeline(user_id, time_range):
                 {'user_id': user_id, 'type': 'event', 'label': event_label,
                  'timestamp': item['data']['startTime'],
                  'start_ts': item['data']['startTime'],
+                 'start_datetime': datetime.datetime.fromtimestamp(item['data']['startTime'] / 1000),
                  'end_ts': item['data']['endTime'],
+                 'end_datetime': datetime.datetime.fromtimestamp(item['data']['endTime'] / 1000),
+                 'start_location': {'title': start_poi[0], 'dist': start_poi[1],
+                                    'geo_point': start_location_item['location']},
+                 'end_location': {'title': end_poi[0], 'dist': end_poi[1],
+                                  'geo_point': end_location_item['location']},
                  'evidence_list': {'hos_ids': [], 'location_ids': location_ids,
                                    'motion_ids': motion_ids, 'event_ids': [item['data']['_id']]},
                  'motion_count': motion_dict,
