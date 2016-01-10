@@ -37,6 +37,13 @@ def check_status():
     return 'The %s server is running' % 'senz.app.timeline.generator'
 
 
+@app.route('/start_process', methods=['GET'])
+def start_process_timeline():
+    cmd_str = 'nohup python -u %s/timer_trigger.py >> %s/trigger.log &' % (
+        project_path, project_path)
+    os.system(cmd_str)
+    return json.dumps({'code': 0, 'msg': 'started processing task,cmd=%s' % cmd_str})
+
 
 if __name__ == "__main__":
     app.debug = False

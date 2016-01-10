@@ -89,7 +89,7 @@ def combine_timeline(user_id, time_range):
                                  'location_ids': [],
                                  'motion_ids': [], 'event_ids': []},
                              'motion_count': {},
-                             'poi': {'title': nearest_poi[0], 'dist': nearest_poi[1]}})
+                             'poi': {'title': nearest_poi[0], 'dist': nearest_poi[1], 'geo_point': poi['location']}})
         if item['type'] == 'event':
             poi = get_loc_item(
                 item['data']['evidence_list'][int(len(item['data']['evidence_list']) / 2)]['location_id'])
@@ -119,7 +119,7 @@ def combine_timeline(user_id, time_range):
                  'evidence_list': {'hos_ids': [], 'location_ids': location_ids,
                                    'motion_ids': motion_ids, 'event_ids': [item['data']['_id']]},
                  'motion_count': motion_dict,
-                 'poi': {'title': nearest_poi[0], 'dist': nearest_poi[1]}})
+                 'poi': {'title': nearest_poi[0], 'dist': nearest_poi[1], 'geo_point': poi['location']}})
             # for
             # print '12312'
             # pass
