@@ -46,7 +46,7 @@ def combine_timeline(user_id, time_range):
     if len(hos_list) > 0:
         last_hos_status = hos_list[0]['status']
         last_hos_timestamp = hos_list[0]['timestamp']
-        split_hos_list = [hos_list[0]]
+        split_hos_list = []
         for hos in hos_list:
             cur_hos_status = hos['status']
             cur_hos_timestamp = hos['timestamp']
