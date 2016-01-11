@@ -113,13 +113,14 @@ def save_timeline2mongo(timeline_list):
                     timeline_obj['end_ts'] = timeline_item['timestamp']
                     timeline_obj['end_datetime'] = timeline_item['start_datetime']
                     timeline_obj['end_location'] = timeline_item['poi']
+                    timeline_obj['end_hos_evidences'] = timeline_item['evidence_list']['hos_ids']
                     db_combined_timeline.insert(timeline_obj)
                     insert_count += 1.0
                     # creat new timeline_obj
                     timeline_obj = {}
                 timeline_obj['user_id'] = timeline_item['user_id']
                 timeline_obj['cur_version'] = '0.1.0'
-                timeline_obj['hos_evidences'] = timeline_item['evidence_list']['hos_ids']
+                timeline_obj['start_hos_evidences'] = timeline_item['evidence_list']['hos_ids']
                 timeline_obj['start_hos'] = timeline_item['label']
                 timeline_obj['start_ts'] = timeline_item['timestamp']
                 timeline_obj['start_datetime'] = timeline_item['start_datetime']
