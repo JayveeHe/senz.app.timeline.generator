@@ -103,9 +103,33 @@ def get_mot_item(mot_id):
 def save_timeline2mongo(timeline_list):
     try:
         insert_count = 0
+        timeline_obj = {}
         for timeline_item in timeline_list:
-            db_combined_timeline.insert(timeline_item)
-            insert_count += 1
+            if timeline_item['type'] == 'hos':
+                # start of a timeline obj
+                if len(timeline_obj) > 0:
+                    # save the last timeline_obj
+                    timeline_obj['end_hos'] = timeline_item['label']
+                    timeline_obj['end_ts'] = timeline_item['timestamp']
+                    timeline_obj['end_datetime'] = timeline_item['start_datetime']
+                    timeline_obj['end_location'] = timeline_item['poi']
+                    db_combined_timeline.insert(timeline_obj)
+                    insert_count += 1.0
+                    # creat new timeline_obj
+                    timeline_obj = {}
+                timeline_obj['user_id'] = timeline_item['user_id']
+                timeline_obj['cur_version'] = '0.1.0'
+                timeline_obj['hos_evidences'] = timeline_item['evidence_list']['hos_ids']
+                timeline_obj['start_hos'] = timeline_item['label']
+                timeline_obj['start_ts'] = timeline_item['timestamp']
+                timeline_obj['start_datetime'] = timeline_item['start_datetime']
+                timeline_obj['start_location'] = timeline_item['poi']
+                timeline_obj['event_timeline'] = []
+            elif len(timeline_obj) > 0:
+                timeline_obj['event_timeline'].append(timeline_item)
+
+                # db_combined_timeline.insert(timeline_item)
+                # insert_count += 1
         return insert_count
     except Exception, e:
         print e

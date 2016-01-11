@@ -106,9 +106,7 @@ def combine_timeline(user_id, time_range):
                              'end_location': {'title': end_poi[0], 'dist': end_poi[1],
                                               'geo_point': end_location_item['location']},
                              'evidence_list': {
-                                 'hos_ids': item['data']['hos_evidences'],
-                                 'location_ids': [],
-                                 'motion_ids': [], 'event_ids': []},
+                                 'hos_ids': item['data']['hos_evidences']},
                              'motion_count': {},
                              'poi': {'title': nearest_poi[0], 'dist': nearest_poi[1], 'geo_point': poi['location']}})
         if item['type'] == 'event':
@@ -143,7 +141,7 @@ def combine_timeline(user_id, time_range):
                                     'geo_point': start_location_item['location']},
                  'end_location': {'title': end_poi[0], 'dist': end_poi[1],
                                   'geo_point': end_location_item['location']},
-                 'evidence_list': {'hos_ids': [], 'location_ids': location_ids,
+                 'evidence_list': {'location_ids': location_ids,
                                    'motion_ids': motion_ids, 'event_ids': [item['data']['_id']]},
                  'motion_count': motion_dict,
                  'poi': {'title': nearest_poi[0], 'dist': nearest_poi[1], 'geo_point': poi['location']}})
