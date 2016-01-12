@@ -3,6 +3,7 @@ import time
 import arrow
 import gevent
 from dao_utils import save_timeline2mongo, get_all_users, db_combined_timeline
+import dao_utils
 from data_collector import combine_timeline
 
 __author__ = 'jayvee'
@@ -19,7 +20,8 @@ def process_timeline(user_id, time_range):
         datetime.datetime.now(), user_id, datetime.datetime.fromtimestamp(time_range[0]),
         datetime.datetime.fromtimestamp(time_range[1]))
     combined_timelines = combine_timeline(user_id, (time_range[0], time_range[1]))
-    insert_count = save_timeline2mongo(combined_timelines)
+    # insert_count = save_timeline2mongo(combined_timelines)
+    insert_count = dao_utils.save_raw_timeline2mongo(combined_timelines)
     if insert_count is not None:
         print '[%s]user:%s done, process timeline count = %s' % (datetime.datetime.now(), user_id, insert_count)
     else:
@@ -63,5 +65,5 @@ def process_all_timelines(time_range):
 
 if __name__ == '__main__':
     current_time = time.time()
-    process_all_timelines(time_range=((current_time - 24 * 3600.0), current_time))
-    # process_timeline('560388c100b09b53b59504d2',time_range=((current_time - 24 * 3600.0), current_time))
+    # process_all_timelines(time_range=((current_time - 24 * 3600.0), current_time))
+    process_timeline('560388c100b09b53b59504d2',time_range=((current_time - 24 * 3600.0), current_time))

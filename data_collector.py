@@ -1,4 +1,5 @@
 import datetime
+import pytz
 from dao_utils import get_user_hos, get_user_events, get_mot_item, get_loc_item, save_timeline2mongo
 import time_utils
 
@@ -51,6 +52,7 @@ def combine_timeline(user_id, time_range):
             cur_hos_status = hos['status']
             cur_hos_timestamp = hos['timestamp']
             if cur_hos_status != last_hos_status and len(split_hos_list) > 1:
+                # TODO smooth hos status
                 combine_list.append({'type': 'hos', 'timestamp': split_hos_list[0]['timestamp'],
                                      'data': {'startTime': split_hos_list[0]['timestamp'],
                                               'endTime': split_hos_list[len(split_hos_list) - 1]['timestamp'],
@@ -98,9 +100,11 @@ def combine_timeline(user_id, time_range):
                              'label': item['data']['status'],
                              'timestamp': item['data']['startTime'],
                              'start_ts': item['data']['startTime'],
-                             'start_datetime': datetime.datetime.fromtimestamp(item['data']['startTime'] / 1000),
+                             'start_datetime': datetime.datetime.fromtimestamp(item['data']['startTime'] / 1000,
+                                                                               pytz.timezone('UTC')),
                              'end_ts': item['data']['endTime'],
-                             'end_datetime': datetime.datetime.fromtimestamp(item['data']['endTime'] / 1000),
+                             'end_datetime': datetime.datetime.fromtimestamp(item['data']['endTime'] / 1000,
+                                                                             pytz.timezone('UTC')),
                              'start_location': {'title': start_poi[0], 'dist': start_poi[1],
                                                 'geo_point': start_location_item['location']},
                              'end_location': {'title': end_poi[0], 'dist': end_poi[1],
@@ -134,9 +138,10 @@ def combine_timeline(user_id, time_range):
                 {'user_id': user_id, 'type': 'event', 'label': event_label,
                  'timestamp': item['data']['startTime'],
                  'start_ts': item['data']['startTime'],
-                 'start_datetime': datetime.datetime.fromtimestamp(item['data']['startTime'] / 1000),
+                 'start_datetime': datetime.datetime.fromtimestamp(item['data']['startTime'] / 1000,
+                                                                   pytz.timezone('UTC')),
                  'end_ts': item['data']['endTime'],
-                 'end_datetime': datetime.datetime.fromtimestamp(item['data']['endTime'] / 1000),
+                 'end_datetime': datetime.datetime.fromtimestamp(item['data']['endTime'] / 1000, pytz.timezone('UTC')),
                  'start_location': {'title': start_poi[0], 'dist': start_poi[1],
                                     'geo_point': start_location_item['location']},
                  'end_location': {'title': end_poi[0], 'dist': end_poi[1],

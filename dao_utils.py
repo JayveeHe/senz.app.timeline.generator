@@ -1,5 +1,6 @@
 import copy
 from bson import ObjectId
+import datetime
 import leancloud
 import pymongo
 import time_utils
@@ -100,6 +101,19 @@ def get_mot_item(mot_id):
     return next(find_cursor)
 
 
+def save_raw_timeline2mongo(timeline_list):
+    try:
+        insert_count = 0
+        for timeline_item in timeline_list:
+            timeline_item['createdAt'] = datetime.datetime.utcnow()
+            db_combined_timeline.insert(timeline_item)
+            insert_count += 1
+        return insert_count
+    except Exception, e:
+        print e
+        return None
+
+
 def save_timeline2mongo(timeline_list):
     try:
         insert_count = 0
@@ -114,6 +128,7 @@ def save_timeline2mongo(timeline_list):
                     timeline_obj['end_datetime'] = timeline_item['start_datetime']
                     timeline_obj['end_location'] = timeline_item['poi']
                     timeline_obj['end_hos_evidences'] = timeline_item['evidence_list']['hos_ids']
+                    timeline_obj['createdAt'] = datetime.datetime.utcnow()
                     db_combined_timeline.insert(timeline_obj)
                     insert_count += 1.0
                     # creat new timeline_obj
