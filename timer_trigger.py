@@ -65,5 +65,5 @@ def process_all_timelines(time_range):
 
 if __name__ == '__main__':
     current_time = time.time()
-    # process_all_timelines(time_range=((current_time - 24 * 3600.0), current_time))
-    process_timeline('560388c100b09b53b59504d2',time_range=((current_time - 24 * 3600.0), current_time))
+    process_all_timelines(time_range=((current_time - 24 * 3600.0), current_time))
+    # process_timeline('560388c100b09b53b59504d2',time_range=((current_time - 24 * 3600.0), current_time))
