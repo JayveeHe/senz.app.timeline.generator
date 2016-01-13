@@ -10,3 +10,4 @@ blinker
 bugsnag
 gevent
 requests
+pytz
