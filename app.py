@@ -45,6 +45,14 @@ def start_process_timeline():
     return json.dumps({'code': 0, 'msg': 'started processing task,cmd=%s' % cmd_str})
 
 
+@app.route('/start_offline_process', methods=['GET'])
+def start_offline_process_timeline():
+    cmd_str = 'nohup python -u %s/offline_trigger.py >> %s/offline_trigger.log &' % (
+        project_path, project_path)
+    os.system(cmd_str)
+    return json.dumps({'code': 0, 'msg': 'started offline processing task,cmd=%s' % cmd_str})
+
+
 if __name__ == "__main__":
     app.debug = False
     app.run(host='0.0.0.0', port=3333)

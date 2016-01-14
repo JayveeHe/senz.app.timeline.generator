@@ -101,12 +101,28 @@ def get_mot_item(mot_id):
     return next(find_cursor)
 
 
-def save_raw_timeline2mongo(timeline_list):
+def save_raw_timeline2mongo(timeline_list, tag=''):
     try:
         insert_count = 0
         for timeline_item in timeline_list:
-            timeline_item['createdAt'] = datetime.datetime.utcnow()
-            db_combined_timeline.insert(timeline_item)
+            timeline_item['tag'] = tag
+
+            # check if exists
+            user_id = timeline_item['user_id']
+            start_ts = timeline_item['start_ts']
+            end_ts = timeline_item['end_ts']
+            item_type = timeline_item['type']
+            find_result = db_combined_timeline.find_one({"user_id": user_id, 'start_ts': start_ts, 'type': item_type})
+            if find_result:
+                # todo what if timerange has changed?
+                # find_result['updatedAt'] = datetime.datetime.utcnow()
+                timeline_item['updatedAt'] = datetime.datetime.utcnow()
+                db_combined_timeline.update({"user_id": user_id, 'start_ts': start_ts, 'type': item_type},
+                                            timeline_item)
+            else:
+                timeline_item['createdAt'] = datetime.datetime.utcnow()
+                timeline_item['updatedAt'] = datetime.datetime.utcnow()
+                db_combined_timeline.insert(timeline_item)
             insert_count += 1
         return insert_count
     except Exception, e:
