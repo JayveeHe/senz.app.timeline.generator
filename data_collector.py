@@ -1,6 +1,7 @@
 import datetime
 import pytz
 from dao_utils import get_user_hos, get_user_events, get_mot_item, get_loc_item, save_timeline2mongo
+import dao_utils
 import time_utils
 
 __author__ = 'jayvee'
@@ -90,12 +91,21 @@ def combine_timeline(user_id, time_range):
     timeline = []
     for item in sorted_list:
         start_location_item = get_loc_item(item['data']['start_location_id'])
+        start_title_head = '%s%s%s ' % (
+            start_location_item['city'], start_location_item['district'], start_location_item['street'])
         start_poi = get_nearest_poi(start_location_item['pois']['pois'])
+        start_poi = (start_title_head + start_poi[0], start_poi[1])
         end_location_item = get_loc_item(item['data']['end_location_id'])
+        end_title_head = '%s%s%s ' % (
+            end_location_item['city'], end_location_item['district'], end_location_item['street'])
         end_poi = get_nearest_poi(end_location_item['pois']['pois'])
+        end_poi = (end_title_head + end_poi[0], end_poi[1])
+
         if item['type'] == 'hos':
             poi = get_loc_item(item['data']['user_location_id'])
+            title_head = '%s%s%s ' % (poi['city'], poi['district'], poi['street'])
             nearest_poi = get_nearest_poi(poi['pois']['pois'])
+            nearest_poi = (title_head+nearest_poi[0],nearest_poi[1])
             timeline.append({'user_id': user_id, 'type': 'hos',
                              'label': item['data']['status'],
                              'timestamp': item['data']['startTime'],
@@ -116,7 +126,10 @@ def combine_timeline(user_id, time_range):
         if item['type'] == 'event':
             poi = get_loc_item(
                 item['data']['evidence_list'][int(len(item['data']['evidence_list']) / 2)]['location_id'])
+            title_head = '%s%s%s ' % (poi['city'], poi['district'], poi['street'])
             nearest_poi = get_nearest_poi(poi['pois']['pois'])
+            nearest_poi = (title_head+nearest_poi[0],nearest_poi[1])
+            # nearest_poi = get_nearest_poi(poi['pois']['pois'])
             location_ids = [x['location_id'] for x in item['data']['evidence_list']]
             motion_ids = [x['motion_id'] for x in item['data']['evidence_list']
                           if x['motion_id']]
@@ -159,8 +172,10 @@ def combine_timeline(user_id, time_range):
 if __name__ == '__main__':
     # get_user_hos('564ee2fbddb28e2d3f880165', (start_timestamp, end_timestamp))
     # get_user_events('564ee2fbddb28e2d3f880165', (start_timestamp, end_timestamp))
-    combined_timelines = combine_timeline('564bd84b60b2ed362064985f', (start_timestamp, end_timestamp))
-    if save_timeline2mongo(combined_timelines):
+    start_timestamp = time_utils.trans_strtime2timestamp('2016-01-15 00:00:00')
+    end_timestamp = time_utils.trans_strtime2timestamp('2016-01-15 23:59:59')
+    combined_timelines = combine_timeline('5634da2360b22ab52ef82a45', (start_timestamp, end_timestamp))
+    if dao_utils.save_raw_timeline2mongo(combined_timelines):
         print 'done'
     else:
         print 'error'
