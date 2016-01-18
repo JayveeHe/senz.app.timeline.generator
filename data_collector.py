@@ -144,11 +144,11 @@ def combine_timeline(user_id, time_range):
                     else:
                         motion_dict[motion_type] = 1
             event_label = item['data']['event'].keys()[0]
-            if event_label == 'going_out':
-                if item['data']['isOnSubway']:
-                    event_label = 'on_subway'
+            # if event_label == 'going_out':
+            #     if item['data']['isOnSubway']:
+            #         event_label = 'on_subway'
             timeline.append(
-                {'user_id': user_id, 'type': 'event', 'label': event_label,
+                {'user_id': user_id, 'type': 'event', 'label': event_label,'level2_event':item['data']['level2_event'],
                  'timestamp': item['data']['startTime'],
                  'start_ts': item['data']['startTime'],
                  'start_datetime': datetime.datetime.fromtimestamp(item['data']['startTime'] / 1000,
@@ -172,8 +172,8 @@ def combine_timeline(user_id, time_range):
 if __name__ == '__main__':
     # get_user_hos('564ee2fbddb28e2d3f880165', (start_timestamp, end_timestamp))
     # get_user_events('564ee2fbddb28e2d3f880165', (start_timestamp, end_timestamp))
-    start_timestamp = time_utils.trans_strtime2timestamp('2016-01-15 00:00:00')
-    end_timestamp = time_utils.trans_strtime2timestamp('2016-01-15 23:59:59')
+    start_timestamp = time_utils.trans_strtime2timestamp('2016-01-18 00:00:00')
+    end_timestamp = time_utils.trans_strtime2timestamp('2016-01-18 23:59:59')
     combined_timelines = combine_timeline('5634da2360b22ab52ef82a45', (start_timestamp, end_timestamp))
     if dao_utils.save_raw_timeline2mongo(combined_timelines):
         print 'done'

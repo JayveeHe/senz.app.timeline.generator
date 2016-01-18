@@ -157,6 +157,7 @@ def save_timeline2mongo(timeline_list):
                 timeline_obj['start_datetime'] = timeline_item['start_datetime']
                 timeline_obj['start_location'] = timeline_item['poi']
                 timeline_obj['event_timeline'] = []
+
             elif len(timeline_obj) > 0:
                 timeline_obj['event_timeline'].append(timeline_item)
 
