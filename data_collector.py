@@ -65,9 +65,10 @@ def combine_timeline(user_id, time_range):
                                               '_id': str(split_hos_list[0]['_id']),
                                               'hos_evidences': [str(x['_id']) for x in split_hos_list]}})
                 split_hos_list = [hos]
+                last_hos_status = hos['status']
             else:
                 split_hos_list.append(hos)
-            last_hos_status = hos['status']
+            # last_hos_status = hos['status']
             last_hos_timestamp = hos['timestamp']
         # handle the last hos
         if len(split_hos_list) > 0:
@@ -172,8 +173,8 @@ def combine_timeline(user_id, time_range):
 if __name__ == '__main__':
     # get_user_hos('564ee2fbddb28e2d3f880165', (start_timestamp, end_timestamp))
     # get_user_events('564ee2fbddb28e2d3f880165', (start_timestamp, end_timestamp))
-    start_timestamp = time_utils.trans_strtime2timestamp('2016-01-18 00:00:00')
-    end_timestamp = time_utils.trans_strtime2timestamp('2016-01-18 23:59:59')
+    start_timestamp = time_utils.trans_strtime2timestamp('2016-01-17 00:00:00')
+    end_timestamp = time_utils.trans_strtime2timestamp('2016-01-17 23:59:59')
     combined_timelines = combine_timeline('5634da2360b22ab52ef82a45', (start_timestamp, end_timestamp))
     if dao_utils.save_raw_timeline2mongo(combined_timelines):
         print 'done'

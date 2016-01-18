@@ -115,6 +115,8 @@ def save_raw_timeline2mongo(timeline_list, tag=''):
             find_result = db_combined_timeline.find_one({"user_id": user_id, 'start_ts': start_ts, 'type': item_type})
             if find_result:
                 # todo what if timerange has changed?
+                # if find_result['end_ts']:
+
                 # find_result['updatedAt'] = datetime.datetime.utcnow()
                 timeline_item['updatedAt'] = datetime.datetime.utcnow()
                 db_combined_timeline.update({"user_id": user_id, 'start_ts': start_ts, 'type': item_type},
