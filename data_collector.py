@@ -84,10 +84,40 @@ def combine_timeline(user_id, time_range):
                                           'hos_evidences': [str(x['_id']) for x in split_hos_list]}})
             # combine_list.append({'type': 'hos', 'timestamp': hos['timestamp'], 'data': hos})
     if len(event_list) > 0:
+        split_event_list = []
+        last_event_label = event_list[0]['event'].keys()[0]
+        last_l2_event_label = event_list[0]['level2_event']
+        last_event = event_list[0]
+        event_ids = []
         for event in event_list:
-            event['start_location_id'] = event['evidence_list'][0]['location_id']
-            event['end_location_id'] = event['evidence_list'][len(event['evidence_list']) - 1]['location_id']
-            combine_list.append({'type': 'event', 'timestamp': event['startTime'], 'data': event})
+            # combine event list
+            cur_event_label = event['event'].keys()[0]
+            cur_l2_event_label = event['level2_event']
+            if last_event_label != cur_event_label or last_l2_event_label != cur_l2_event_label:
+                # push split event list
+                evidence_list = []
+                for i_event in split_event_list:
+                    evidence_list.extend(i_event['evidence_list'])
+                last_event['start_location_id'] = evidence_list[0]['location_id']
+                last_event['end_location_id'] = evidence_list[len(evidence_list) - 1]['location_id']
+                last_event['startTime'] = split_event_list[0]['startTime']
+                last_event['start_datetime'] = split_event_list[0]['start_datetime']
+                last_event['timestamp'] = split_event_list[0]['timestamp']
+                last_event['event_ids'] = event_ids
+                combine_list.append({'type': 'event', 'timestamp': last_event['startTime'], 'data': last_event})
+                # status reset
+                split_event_list = [event]
+                event_ids = [event['_id']]
+                last_event_label = event['event'].keys()[0]
+                last_l2_event_label = event['level2_event']
+                last_event = event
+            else:
+                split_event_list.append(event)
+                event_ids.append(event['_id'])
+
+                # event['start_location_id'] = event['evidence_list'][0]['location_id']
+                # event['end_location_id'] = event['evidence_list'][len(event['evidence_list']) - 1]['location_id']
+                # combine_list.append({'type': 'event', 'timestamp': event['startTime'], 'data': event})
     sorted_list = sorted(combine_list, cmp=lambda x, y: cmp(x['timestamp'], y['timestamp']))
     timeline = []
     for item in sorted_list:
@@ -106,7 +136,7 @@ def combine_timeline(user_id, time_range):
             poi = get_loc_item(item['data']['user_location_id'])
             title_head = '%s%s%s ' % (poi['city'], poi['district'], poi['street'])
             nearest_poi = get_nearest_poi(poi['pois']['pois'])
-            nearest_poi = (title_head+nearest_poi[0],nearest_poi[1])
+            nearest_poi = (title_head + nearest_poi[0], nearest_poi[1])
             timeline.append({'user_id': user_id, 'type': 'hos',
                              'label': item['data']['status'],
                              'timestamp': item['data']['startTime'],
@@ -129,7 +159,7 @@ def combine_timeline(user_id, time_range):
                 item['data']['evidence_list'][int(len(item['data']['evidence_list']) / 2)]['location_id'])
             title_head = '%s%s%s ' % (poi['city'], poi['district'], poi['street'])
             nearest_poi = get_nearest_poi(poi['pois']['pois'])
-            nearest_poi = (title_head+nearest_poi[0],nearest_poi[1])
+            nearest_poi = (title_head + nearest_poi[0], nearest_poi[1])
             # nearest_poi = get_nearest_poi(poi['pois']['pois'])
             location_ids = [x['location_id'] for x in item['data']['evidence_list']]
             motion_ids = [x['motion_id'] for x in item['data']['evidence_list']
@@ -149,7 +179,9 @@ def combine_timeline(user_id, time_range):
             #     if item['data']['isOnSubway']:
             #         event_label = 'on_subway'
             timeline.append(
-                {'user_id': user_id, 'type': 'event', 'label': event_label,'level2_event':item['data']['level2_event'],
+                {'user_id': user_id, 'type': 'event', 'label': event_label,
+                 'level2_event': item['data']['level2_event'],
+                 'event_ids':item['data']['event_ids'],
                  'timestamp': item['data']['startTime'],
                  'start_ts': item['data']['startTime'],
                  'start_datetime': datetime.datetime.fromtimestamp(item['data']['startTime'] / 1000,
