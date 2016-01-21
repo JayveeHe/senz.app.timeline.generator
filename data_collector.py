@@ -86,13 +86,19 @@ def combine_timeline(user_id, time_range):
     if len(event_list) > 0:
         split_event_list = []
         last_event_label = event_list[0]['event'].keys()[0]
-        last_l2_event_label = event_list[0]['level2_event']
+        last_l2_event_label = event_list[0].get('level2_event', None)
+        if not last_l2_event_label:
+            event_list[0]['level2_event'] = ''
+            last_l2_event_label = ''
         last_event = event_list[0]
         event_ids = []
         for event in event_list:
             # combine event list
             cur_event_label = event['event'].keys()[0]
-            cur_l2_event_label = event['level2_event']
+            cur_l2_event_label = event.get('level2_event')
+            if not cur_l2_event_label:
+                cur_l2_event_label = ''
+                event['level2_event'] = ''
             if last_event_label != cur_event_label or last_l2_event_label != cur_l2_event_label:
                 # push split event list
                 evidence_list = []
@@ -137,6 +143,14 @@ def combine_timeline(user_id, time_range):
             title_head = '%s%s%s ' % (poi['city'], poi['district'], poi['street'])
             nearest_poi = get_nearest_poi(poi['pois']['pois'])
             nearest_poi = (title_head + nearest_poi[0], nearest_poi[1])
+            # remove event that indicate hos at same time
+            if len(timeline) > 0:
+                hos_event_map = {'at_home': 'relaxing', 'at_office': 'work_in_office'}
+                hos_label = item['data']['status']
+                if timeline[-1]['label'] == hos_event_map.get(hos_label) and \
+                                timeline[-1]['start_ts'] == item['data']['startTime']:
+                    # timeline.remove(timeline[-1])
+                    timeline[-1]['start_ts'] -= 10000
             timeline.append({'user_id': user_id, 'type': 'hos',
                              'label': item['data']['status'],
                              'timestamp': item['data']['startTime'],
@@ -178,10 +192,19 @@ def combine_timeline(user_id, time_range):
             # if event_label == 'going_out':
             #     if item['data']['isOnSubway']:
             #         event_label = 'on_subway'
+            # remove event that indicate hos at same time
+            if len(timeline) > 0:
+                event_hos_map = {'relaxing': 'at_home', 'work_in_office': 'at_office'}
+                hos_label = timeline[-1]['label']
+                if event_label == event_hos_map.get(hos_label) \
+                        and timeline[-1]['start_ts'] == item['data']['startTime']:
+                    # continue
+                    item['data']['startTime'] += 10000
             timeline.append(
-                {'user_id': user_id, 'type': 'event', 'label': event_label,
+                {'user_id': user_id, 'type': 'event',
+                 'label': event_label,
                  'level2_event': item['data']['level2_event'],
-                 'event_ids':item['data']['event_ids'],
+                 'event_ids': item['data']['event_ids'],
                  'timestamp': item['data']['startTime'],
                  'start_ts': item['data']['startTime'],
                  'start_datetime': datetime.datetime.fromtimestamp(item['data']['startTime'] / 1000,
@@ -204,9 +227,9 @@ def combine_timeline(user_id, time_range):
 
 if __name__ == '__main__':
     # get_user_hos('564ee2fbddb28e2d3f880165', (start_timestamp, end_timestamp))
-    # get_user_events('564ee2fbddb28e2d3f880165', (start_timestamp, end_timestamp))
-    start_timestamp = time_utils.trans_strtime2timestamp('2016-01-17 00:00:00')
-    end_timestamp = time_utils.trans_strtime2timestamp('2016-01-17 23:59:59')
+    # get_user_events('560388c100b09b53b59504d2', (start_timestamp, end_timestamp))
+    start_timestamp = time_utils.trans_strtime2timestamp('2016-01-10 00:00:00')
+    end_timestamp = time_utils.trans_strtime2timestamp('2016-01-21 23:59:59')
     combined_timelines = combine_timeline('5634da2360b22ab52ef82a45', (start_timestamp, end_timestamp))
     if dao_utils.save_raw_timeline2mongo(combined_timelines):
         print 'done'

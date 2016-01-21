@@ -82,7 +82,7 @@ def get_user_events(user_id, time_range):
     event_query.greater_than_or_equal_to('startTime', time_range[0] * 1000)
     event_query.less_than_or_equal_to('endTime', time_range[1] * 1000)
     event_query.ascending('startTime')
-    find_result = event_query.find()
+    find_result = _find(event_query)
     user_event_list = []
     for item in find_result:
         item.attributes['_id'] = item.id
@@ -121,7 +121,8 @@ def save_raw_timeline2mongo(timeline_list, tag=''):
                 if find_result['end_ts'] != end_ts:
                     # delete documents in latest time_range
                     db_combined_timeline.delete_many(
-                        {'type': item_type, 'start_ts': {'$gt': start_ts}, 'end_ts': {'$lt': end_ts}})
+                        {'type': item_type, 'user_id': user_id, 'start_ts': {'$gt': start_ts},
+                         'end_ts': {'$lt': end_ts}})
                     # find_result['updatedAt'] = datetime.datetime.utcnow()
             else:
                 timeline_item['createdAt'] = datetime.datetime.utcnow()
